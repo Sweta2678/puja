@@ -1,25 +1,25 @@
-# Use an official Maven image to build the app
-FROM maven:3.8.7-openjdk-17 AS build
+# 🧱 Stage 1: Build the application
+FROM maven:3.8-openjdk-17 AS builder
 
-# Set the working directory
 WORKDIR /app
 
-# Copy pom.xml and install dependencies (caching)
+# Copy the pom.xml and download dependencies
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
-# Copy the rest of the project and build
-COPY . .
+# Copy the source code
+COPY src ./src
+
+# Build the app (skip tests)
 RUN mvn clean package -DskipTests
 
-# Use a smaller image for running the app
-FROM maven:3.8-openjdk-17 AS build
+# 📦 Stage 2: Run the built jar
+FROM openjdk:17-jdk-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy built JAR from the build image
-COPY --from=build /app/target/*.jar app.jar
+# Copy the jar from the builder
+COPY --from=builder /app/target/*.jar app.jar
 
-# Run the JAR file
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the application
+CMD ["java", "-jar", "app.jar"]
