@@ -1,5 +1,5 @@
 
-package com.example.feedback.model;
+package com.puja.feedback.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
